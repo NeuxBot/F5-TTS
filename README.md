@@ -2,11 +2,12 @@
 
 [![python](https://img.shields.io/badge/Python-3.10-brightgreen)](https://github.com/SWivid/F5-TTS)
 [![arXiv](https://img.shields.io/badge/arXiv-2410.06885-b31b1b.svg?logo=arXiv)](https://arxiv.org/abs/2410.06885)
-[![demo](https://img.shields.io/badge/GitHub-Demo%20page-orange.svg)](https://swivid.github.io/F5-TTS/)
-[![hfspace](https://img.shields.io/badge/🤗-Space%20demo-yellow)](https://huggingface.co/spaces/mrfakename/E2-F5-TTS)
-[![msspace](https://img.shields.io/badge/🤖-Space%20demo-blue)](https://modelscope.cn/studios/modelscope/E2-F5-TTS)
-[![lab](https://img.shields.io/badge/X--LANCE-Lab-grey?labelColor=lightgrey)](https://x-lance.sjtu.edu.cn/)
-[![lab](https://img.shields.io/badge/Peng%20Cheng-Lab-grey?labelColor=lightgrey)](https://www.pcl.ac.cn)
+[![demo](https://img.shields.io/badge/GitHub-Demo-orange.svg)](https://swivid.github.io/F5-TTS/)
+[![hfspace](https://img.shields.io/badge/🤗-HF%20Space-yellow)](https://huggingface.co/spaces/mrfakename/E2-F5-TTS)
+[![msspace](https://img.shields.io/badge/🤖-MS%20Space-blue)](https://modelscope.cn/studios/AI-ModelScope/E2-F5-TTS)
+[![lab](https://img.shields.io/badge/🏫-X--LANCE-grey?labelColor=lightgrey)](https://x-lance.sjtu.edu.cn/)
+[![lab](https://img.shields.io/badge/🏫-SII-grey?labelColor=lightgrey)](https://www.sii.edu.cn/)
+[![lab](https://img.shields.io/badge/🏫-PCL-grey?labelColor=lightgrey)](https://www.pcl.ac.cn)
 <!-- <img src="https://github.com/user-attachments/assets/12d7749c-071a-427c-81bf-b87b91def670" alt="Watermark" style="width: 40px; height: auto"> -->
 
 **F5-TTS**: Diffusion Transformer with ConvNeXt V2, faster trained and inference.
@@ -26,9 +27,12 @@
 ### Create a separate environment if needed
 
 ```bash
-# Create a python 3.10 conda env (you could also use virtualenv)
-conda create -n f5-tts python=3.10
+# Create a conda env with python_version>=3.10  (you could also use virtualenv)
+conda create -n f5-tts python=3.11
 conda activate f5-tts
+
+# Install FFmpeg if you haven't yet
+conda install ffmpeg
 ```
 
 ### Install PyTorch with matched device
@@ -38,7 +42,11 @@ conda activate f5-tts
 
 > ```bash
 > # Install pytorch with your CUDA version, e.g.
+> pip install torch==2.8.0+cu128 torchaudio==2.8.0+cu128 --extra-index-url https://download.pytorch.org/whl/cu128
+> 
+> # And also possible previous versions, e.g.
 > pip install torch==2.4.0+cu124 torchaudio==2.4.0+cu124 --extra-index-url https://download.pytorch.org/whl/cu124
+> # etc.
 > ```
 
 </details>
@@ -91,7 +99,7 @@ conda activate f5-tts
 > ```bash
 > git clone https://github.com/SWivid/F5-TTS.git
 > cd F5-TTS
-> # git submodule update --init --recursive  # (optional, if need > bigvgan)
+> # git submodule update --init --recursive  # (optional, if use bigvgan as vocoder)
 > pip install -e .
 > ```
 

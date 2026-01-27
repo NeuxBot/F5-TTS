@@ -30,15 +30,6 @@ python3 client_grpc.py \
     --huggingface-dataset yuekai/seed_tts \
     --split-name test_zh \
     --log-dir ./log_concurrent_tasks_${num_task}
-
-# For offline Spark-TTS-0.5B
-python3 client_grpc.py \
-    --server-addr localhost \
-    --model-name spark_tts \
-    --num-tasks $num_task \
-    --huggingface-dataset yuekai/seed_tts \
-    --split-name wenetspeech4tts \
-    --log-dir ./log_concurrent_tasks_${num_task}
 """
 
 import argparse
@@ -176,8 +167,7 @@ def get_args():
         "--model-name",
         type=str,
         default="f5_tts",
-        choices=["f5_tts", "spark_tts"],
-        help="triton model_repo module name to request: transducer for k2, attention_rescoring for wenet offline, streaming_wenet for wenet streaming, infer_pipeline for paraformer large offline",
+        help="triton model_repo module name to request",
     )
 
     parser.add_argument(
@@ -206,7 +196,7 @@ def get_args():
         "--log-dir",
         type=str,
         required=False,
-        default="./tmp",
+        default="./tests/client_grpc",
         help="log directory",
     )
 
@@ -220,8 +210,8 @@ def get_args():
     return parser.parse_args()
 
 
-def load_audio(wav_path, target_sample_rate=16000):
-    assert target_sample_rate == 16000, "hard coding in server"
+def load_audio(wav_path, target_sample_rate=24000):
+    assert target_sample_rate == 24000, "hard coding in server"
     if isinstance(wav_path, dict):
         waveform = wav_path["array"]
         sample_rate = wav_path["sampling_rate"]
@@ -230,8 +220,7 @@ def load_audio(wav_path, target_sample_rate=16000):
     if sample_rate != target_sample_rate:
         from scipy.signal import resample
 
-        num_samples = int(len(waveform) * (target_sample_rate / sample_rate))
-        waveform = resample(waveform, num_samples)
+        waveform = resample(waveform, int(len(waveform) * (target_sample_rate / sample_rate)))
     return waveform, target_sample_rate
 
 
@@ -244,7 +233,7 @@ async def send(
     model_name: str,
     padding_duration: int = None,
     audio_save_dir: str = "./",
-    save_sample_rate: int = 16000,
+    save_sample_rate: int = 24000,
 ):
     total_duration = 0.0
     latency_data = []
@@ -254,7 +243,7 @@ async def send(
     for i, item in enumerate(manifest_item_list):
         if i % log_interval == 0:
             print(f"{name}: {i}/{len(manifest_item_list)}")
-        waveform, sample_rate = load_audio(item["audio_filepath"], target_sample_rate=16000)
+        waveform, sample_rate = load_audio(item["audio_filepath"], target_sample_rate=24000)
         duration = len(waveform) / sample_rate
         lengths = np.array([[len(waveform)]], dtype=np.int32)
 
@@ -310,8 +299,9 @@ async def send(
         audio_save_path = os.path.join(audio_save_dir, f"{item['target_audio_path']}.wav")
         sf.write(audio_save_path, audio, save_sample_rate, "PCM_16")
 
-        latency_data.append((end, estimated_target_duration))
-        total_duration += estimated_target_duration
+        actual_duration = len(audio) / save_sample_rate
+        latency_data.append((end, actual_duration))
+        total_duration += actual_duration
 
     return total_duration, latency_data
 
@@ -416,7 +406,7 @@ async def main():
                 model_name=args.model_name,
                 audio_save_dir=args.log_dir,
                 padding_duration=1,
-                save_sample_rate=24000 if args.model_name == "f5_tts" else 16000,
+                save_sample_rate=24000,
             )
         )
         tasks.append(task)
