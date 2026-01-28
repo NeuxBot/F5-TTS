@@ -3,10 +3,9 @@
 tests/
 runs/
 data/
-ckpts/
 wandb/
 results/
-
+*.safetensors
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
